@@ -30,6 +30,9 @@ jobs:
           ls -la contrib/ios-arm64/lib || true
           ls -la contrib/ios-simulator-arm64/lib || true
 
+      - name: Build telephony + merged static libs
+        run: make telephony
+
       - name: Verify merged libs (single platform per slice)
         run: |
           lipo -info contrib/ios-arm64/lib/libtelephony_all.a
