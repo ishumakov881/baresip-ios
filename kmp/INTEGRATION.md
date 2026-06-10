@@ -1,46 +1,45 @@
-# Подключение telephony.xcframework в KMP sip-модуль
+# KMP `:kmp:sip`
 
-## 1. Скачать xcframework
+## Артефакт CI
 
-GitHub Actions artifact или Release этого репозитория.
+- `dist/telephony.xcframework` — cinterop на `telephony.h`
+- `contrib/ios-arm64/lib/libre.a`, `libbaresip.a`
+- `contrib/ios-simulator-arm64/lib/libre.a`, `libbaresip.a`
+
+Склейка в один `.a` не нужна (upstream тоже линкует три библиотеки отдельно).
+
+## prebuilt/
 
 ```
-prebuilt/ios/telephony.xcframework
+prebuilt/ios/
+  telephony.xcframework
+  device/libre.a libbaresip.a
+  simulator/libre.a libbaresip.a
+  Headers/   # telephony.h, telephony_callback.h
 ```
 
-## 2. build.gradle.kts
+## linkerOpts (пример)
 
 ```kotlin
-kotlin {
-    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { target ->
-        target.compilations.getByName("main") {
-            cinterops {
-                val telephony by creating {
-                    defFile(project.file("src/nativeInterop/cinterop/telephony.def"))
-                    includeDirs(project.file("prebuilt/ios/Headers"))
-                }
-            }
-        }
-        target.binaries.framework {
-            baseName = "sipKit"
-            linkerOpts(
-                "-F${project.file("prebuilt/ios")}",
-                "-framework", "telephony",
-                "-framework", "AudioToolbox",
-                "-framework", "CoreAudio",
-                "-framework", "AVFoundation",
-                "-framework", "SystemConfiguration",
-                "-framework", "CFNetwork",
-            )
-        }
-    }
+val slice = when (target.konanTarget.name) {
+    "ios_arm64" -> "device"
+    else -> "simulator"
 }
+linkerOpts(
+    "-F${project.file("prebuilt/ios")}",
+    "-framework", "telephony",
+    "${project.file("prebuilt/ios/$slice")}/libbaresip.a",
+    "${project.file("prebuilt/ios/$slice")}/libre.a",
+    "-lresolv",
+    "-framework", "AudioToolbox",
+    "-framework", "AVFoundation",
+    "-framework", "SystemConfiguration",
+    "-framework", "CFNetwork",
+    "-framework", "CoreMedia",
+)
 ```
 
-## 3. IosSipEngine
+## Остальное
 
-Скопировать `kmp/IosSipEngine.kt` в `iosMain`, подключить cinterop (`kmp/telephony.def`).
-
-## 4. DI
-
-`SipEngine` → реализация для iOS вместо заглушки.
+- `kmp/telephony.def`, `kmp/IosSipEngine.kt` → `iosMain`
+- `SipEngine` в Koin вместо `StubSipEngine`

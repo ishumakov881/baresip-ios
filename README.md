@@ -1,43 +1,37 @@
 # Baresip for iOS + telephony
 
-Fork [baresip/baresip-ios](https://github.com/baresip/baresip-ios) + слой **`telephony/`** (тот же сценарий, что на Android: `ua_register` → `ua_connect`).
+Fork [baresip/baresip-ios](https://github.com/baresip/baresip-ios) + слой **`telephony/`** (как JNI на Android).
 
-Собирает **`telephony.xcframework`** для KMP (`:kmp:sip` / `io.github.ishumakov881:sip`).
-
-## Локальная сборка (только macOS + Xcode)
+## Сборка (macOS + Xcode)
 
 ```bash
 make download
 make all
-# → dist/telephony.xcframework
 ```
+
+Результат:
+- `dist/telephony.xcframework` — только обёртка `telephony/*.c`
+- `contrib/ios-arm64/lib/` и `contrib/ios-simulator-arm64/lib/` — `libre.a`, `libbaresip.a`
+
+В KMP линкуете **все три** `.a` + системные фреймворки (как в [upstream README](https://github.com/baresip/baresip-ios): отдельные статические библиотеки, без склейки в один `.a`).
+
+## Почему не «как в upstream в две строки»
+
+| upstream | этот форк |
+|----------|-----------|
+| `make contrib` → fat `.a` под Xcode | то же + `telephony/` + xcframework для KMP |
+| старые Makefile в re/rem/baresip | актуальный baresip 4.x — только CMake → `scripts/build-contrib-ios.sh` |
+
+Снаружи команды те же: `make download` + `make all`.
 
 ## CI
 
-GitHub Actions: [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml)
+GitHub Actions → artifact **telephony-ios** (xcframework + contrib libs).
 
-- `push` / `workflow_dispatch` → artifact **telephony-xcframework**
-- `release` → zip в assets
+## API
 
-## API (C)
+`telephony/telephony.h` — `telephony_init`, `telephony_mainLoop`, `telephony_start_audio_call`, …
 
-См. `telephony/telephony.h` — те же точки входа, что JNI на Android (`telephony_init`, `telephony_mainLoop`, `telephony_start_audio_call`, …).
+## KMP
 
-События UA — коды из `baresip.h` / Android `SipEvent`.
-
-## Подключение в KMP
-
-1. Artifact / релиз → `kmp/sip/prebuilt/ios/telephony.xcframework`
-2. cinterop на `telephony.h`, `telephony_callback.h`
-3. `IosSipEngine` вместо `StubSipEngine`
-
-Подробнее: [`kmp/INTEGRATION.md`](kmp/INTEGRATION.md).
-
-## Структура
-
-```
-telephony/          — call logic (iOS)
-scripts/            — CMake iOS cross-compile for re + baresip
-mk/contrib.mk       — invokes scripts/build-contrib-ios.sh
-mk/telephony.mk     — libtelephony_all.a + telephony.xcframework
-```
+[`kmp/INTEGRATION.md`](kmp/INTEGRATION.md)

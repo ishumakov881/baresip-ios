@@ -16,52 +16,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: CMake version
-        run: cmake --version
-
-      - name: Clone baresip stack
-        run: make download
-
-      - name: Build contrib (re + baresip)
-        run: make baresip
-
-      - name: List contrib libs
+      - name: Build
         run: |
-          ls -la contrib/ios-arm64/lib || true
-          ls -la contrib/ios-simulator-arm64/lib || true
-
-      - name: Build telephony + merged static libs
-        run: make telephony
-
-      - name: Verify merged libs (single platform per slice)
-        run: |
-          lipo -info contrib/ios-arm64/lib/libtelephony_all.a
-          lipo -info contrib/ios-simulator-arm64/lib/libtelephony_all.a
-          otool -l contrib/ios-arm64/lib/libtelephony_all.a | grep -A2 LC_BUILD_VERSION | head -6
-          otool -l contrib/ios-simulator-arm64/lib/libtelephony_all.a | grep -A2 LC_BUILD_VERSION | head -6
-
-      - name: Build xcframework
-        run: make xcframework
+          make download
+          make all
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: telephony-xcframework
+          name: telephony-ios
           path: |
             dist/telephony.xcframework
             dist/headers
+            contrib/ios-arm64/lib
+            contrib/ios-simulator-arm64/lib
           retention-days: 30
 
       - name: Package zip for release
         if: github.event_name == 'release'
         run: |
           cd dist
-          zip -r telephony.xcframework.zip telephony.xcframework headers
+          zip -r telephony-ios.zip telephony.xcframework headers
+          cd ../contrib
+          zip -r ../dist/telephony-ios-contrib.zip ios-arm64/lib ios-simulator-arm64/lib
 
       - name: Upload release asset
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/telephony.xcframework.zip
+          files: |
+            dist/telephony-ios.zip
+            dist/telephony-ios-contrib.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
