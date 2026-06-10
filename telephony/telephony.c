@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG_MODULE "telephony"
+#define DEBUG_LEVEL 7
+
 #include <re.h>
-#include <re_dbg.h>
 #include <baresip.h>
 
 #include "telephony.h"
@@ -221,7 +223,6 @@ static void tel_done(void)
 	mod_close();
 	libre_close();
 
-	dbg_close();
 	log_unregister_handler(&g_platformLog);
 	telephony_reset_callbacks();
 }
