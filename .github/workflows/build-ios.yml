@@ -1,0 +1,46 @@
+name: Build LdsTelephonyKit
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build-xcframework:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Clone baresip stack
+        run: make download
+
+      - name: Build xcframework
+        run: make all
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LdsTelephonyKit-xcframework
+          path: |
+            dist/LdsTelephonyKit.xcframework
+            dist/headers
+          retention-days: 30
+
+      - name: Package zip for release
+        if: github.event_name == 'release'
+        run: |
+          cd dist
+          zip -r LdsTelephonyKit.xcframework.zip LdsTelephonyKit.xcframework headers
+
+      - name: Upload release asset
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/LdsTelephonyKit.xcframework.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

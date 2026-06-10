@@ -1,27 +1,25 @@
 #
-# Makefile
+# LDS Online — baresip iOS + telephony
+# Fork: https://github.com/ishumakov881/baresip-ios
 #
-# Copyright (C) 2010 - 2016 Alfred E. Heggestad
-#
-
 
 BUILD_DIR	:= build
 CONTRIB_DIR	:= contrib
+DIST_DIR	:= dist
 
 include mk/contrib.mk
+include mk/telephony.mk
 
+.PHONY: all download clean info
 
-all:	contrib
+all: xcframework
 
-
-clean:
-	@rm -rf $(BUILD_DIR) $(CONTRIB_DIR) \
-	@rm -rf baresip rem re
-
-
-.PHONY: download
 download:
 	rm -fr baresip re rem
-	git clone https://github.com/baresip/baresip.git
-	git clone https://github.com/baresip/rem.git
-	git clone https://github.com/baresip/re.git
+	git clone --depth 1 https://github.com/baresip/baresip.git
+	git clone --depth 1 https://github.com/baresip/rem.git
+	git clone --depth 1 https://github.com/baresip/re.git
+
+clean:
+	rm -rf $(BUILD_DIR) $(CONTRIB_DIR) $(DIST_DIR)
+	rm -rf baresip re rem

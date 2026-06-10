@@ -1,0 +1,19 @@
+language = C
+headers = telephony.h telephony_callback.h
+headerFilter = telephony.h telephony_callback.h
+
+---
+
+typedef void (*telephony_event_handler_t)(int event, int scode, const char* call_id, void* userdata);
+
+void telephony_set_event_handler(telephony_event_handler_t handler, void* userdata);
+void telephony_reset_callbacks(void);
+void notifyEvent(int event, int scode, const char* callId);
+
+int telephony_init(const char* path);
+int telephony_mainLoop(void);
+void telephony_cmd(int cmd, void* data);
+void telephony_start_audio_call(const char* host, int port, const char* transport,
+    const char* account, const char* login, const char* password, const char* peer);
+void telephony_hangup(void);
+void telephony_stop(void);
