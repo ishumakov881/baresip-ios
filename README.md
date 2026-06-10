@@ -37,6 +37,7 @@ GitHub Actions: [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.
 
 ```
 telephony/          — call logic (iOS)
-mk/contrib.mk       — baresip + re + rem
+scripts/            — CMake iOS cross-compile for re + baresip
+mk/contrib.mk       — invokes scripts/build-contrib-ios.sh
 mk/telephony.mk     — libtelephony_all.a + telephony.xcframework
 ```

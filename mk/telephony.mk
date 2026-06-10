@@ -11,7 +11,6 @@ TELEPHONY_INCLUDES := \
 	-I$(TELEPHONY_DIR) \
 	-I$(BARESIP_PATH)/include \
 	-I$(LIBRE_PATH)/include \
-	-I$(LIBREM_PATH)/include \
 	-I$(CONTRIB_DEVICE)/include \
 	-I$(CONTRIB_SIM)/include
 
@@ -47,23 +46,19 @@ $(CONTRIB_SIM)/lib/libtelephony.a: $(TELEPHONY_OBJ_SIM) | $(CONTRIB_SIM)/lib
 
 $(CONTRIB_DEVICE)/lib/libtelephony_all.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libbaresip.a \
-		$(CONTRIB_DEVICE)/lib/libre.a \
-		$(CONTRIB_DEVICE)/lib/librem.a
+		$(CONTRIB_DEVICE)/lib/libre.a
 	libtool -static -o $@ \
 		$(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libbaresip.a \
-		$(CONTRIB_DEVICE)/lib/libre.a \
-		$(CONTRIB_DEVICE)/lib/librem.a
+		$(CONTRIB_DEVICE)/lib/libre.a
 
 $(CONTRIB_SIM)/lib/libtelephony_all.a: $(CONTRIB_SIM)/lib/libtelephony.a \
 		$(CONTRIB_SIM)/lib/libbaresip.a \
-		$(CONTRIB_SIM)/lib/libre.a \
-		$(CONTRIB_SIM)/lib/librem.a
+		$(CONTRIB_SIM)/lib/libre.a
 	libtool -static -o $@ \
 		$(CONTRIB_SIM)/lib/libtelephony.a \
 		$(CONTRIB_SIM)/lib/libbaresip.a \
-		$(CONTRIB_SIM)/lib/libre.a \
-		$(CONTRIB_SIM)/lib/librem.a
+		$(CONTRIB_SIM)/lib/libre.a
 
 xcframework: telephony
 	@rm -rf $(XCFRAMEWORK)

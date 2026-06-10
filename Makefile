@@ -15,11 +15,10 @@ include mk/telephony.mk
 all: xcframework
 
 download:
-	rm -fr baresip re rem
+	rm -fr baresip re
 	git clone --depth 1 https://github.com/baresip/baresip.git
-	git clone --depth 1 https://github.com/baresip/rem.git
 	git clone --depth 1 https://github.com/baresip/re.git
 
 clean:
 	rm -rf $(BUILD_DIR) $(CONTRIB_DIR) $(DIST_DIR)
-	rm -rf baresip re rem
+	rm -rf baresip re
