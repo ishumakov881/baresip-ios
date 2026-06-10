@@ -1,14 +1,14 @@
-# Подключение telephony.xcframework в walhalla-kmp / ldsonline
+# Подключение telephony.xcframework в KMP sip-модуль
 
 ## 1. Скачать xcframework
 
-Из GitHub Actions artifact или Release: [ishumakov881/baresip-ios](https://github.com/ishumakov881/baresip-ios).
+GitHub Actions artifact или Release этого репозитория.
 
 ```
-kmp/sip/prebuilt/ios/telephony.xcframework
+prebuilt/ios/telephony.xcframework
 ```
 
-## 2. build.gradle.kts (`:kmp:sip`)
+## 2. build.gradle.kts
 
 ```kotlin
 kotlin {
@@ -37,16 +37,10 @@ kotlin {
 }
 ```
 
-Скопировать `kmp/telephony.def` → `src/nativeInterop/cinterop/telephony.def`.
-
 ## 3. IosSipEngine
 
-Скопировать `kmp/IosSipEngine.kt` в `src/iosMain/kotlin/net/lds/sip/`.
+Скопировать `kmp/IosSipEngine.kt` в `iosMain`, подключить cinterop (`kmp/telephony.def`).
 
-## 4. Koin
+## 4. DI
 
-```kotlin
-single<SipEngine> { IosSipEngine() }
-```
-
-вместо `StubSipEngine()`.
+`SipEngine` → реализация для iOS вместо заглушки.

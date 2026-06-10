@@ -1,5 +1,5 @@
-#ifndef LDS_TELEPHONY_CALLBACK_H_
-#define LDS_TELEPHONY_CALLBACK_H_
+#ifndef TELEPHONY_CALLBACK_H_
+#define TELEPHONY_CALLBACK_H_
 
 #ifdef __cplusplus
 extern "C" {

@@ -246,7 +246,7 @@ int telephony_init(const char *path)
 		return err;
 	}
 
-	err = ua_init("LDS Online", true, true, false);
+	err = ua_init("sip", true, true, false);
 	if (err) {
 		LOGI("ERROR: ua_init %d", err);
 		tel_done();

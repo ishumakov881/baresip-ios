@@ -1,5 +1,5 @@
-#ifndef LDS_TELEPHONY_H_
-#define LDS_TELEPHONY_H_
+#ifndef TELEPHONY_H_
+#define TELEPHONY_H_
 
 #include "telephony_callback.h"
 

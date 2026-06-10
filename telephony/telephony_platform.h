@@ -1,5 +1,5 @@
-#ifndef LDS_TELEPHONY_PLATFORM_H_
-#define LDS_TELEPHONY_PLATFORM_H_
+#ifndef TELEPHONY_PLATFORM_H_
+#define TELEPHONY_PLATFORM_H_
 
 #include <stdio.h>
 
