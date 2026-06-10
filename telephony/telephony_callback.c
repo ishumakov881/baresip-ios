@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "telephony_callback.h"
 
 static telephony_event_handler_t g_handler;
