@@ -30,6 +30,13 @@ jobs:
           ls -la contrib/ios-arm64/lib || true
           ls -la contrib/ios-simulator-arm64/lib || true
 
+      - name: Verify merged libs (single platform per slice)
+        run: |
+          lipo -info contrib/ios-arm64/lib/libtelephony_all.a
+          lipo -info contrib/ios-simulator-arm64/lib/libtelephony_all.a
+          otool -l contrib/ios-arm64/lib/libtelephony_all.a | grep -A2 LC_BUILD_VERSION | head -6
+          otool -l contrib/ios-simulator-arm64/lib/libtelephony_all.a | grep -A2 LC_BUILD_VERSION | head -6
+
       - name: Build xcframework
         run: make xcframework
 

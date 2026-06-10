@@ -7,19 +7,15 @@ TELEPHONY_SRCS	:= $(TELEPHONY_DIR)/telephony.c $(TELEPHONY_DIR)/telephony_callba
 TELEPHONY_OBJ_DEVICE := $(BUILD_DEVICE)/telephony/telephony.o $(BUILD_DEVICE)/telephony/telephony_callback.o
 TELEPHONY_OBJ_SIM    := $(BUILD_SIM)/telephony/telephony.o $(BUILD_SIM)/telephony/telephony_callback.o
 
-TELEPHONY_INCLUDES := \
+TELEPHONY_CFLAGS := -O2 -fPIC -DTARGET_OS_IPHONE=1 -DIPHONE \
 	-I$(TELEPHONY_DIR) \
 	-I$(BARESIP_PATH)/include \
 	-I$(LIBRE_PATH)/include \
-	-I$(CONTRIB_DEVICE)/include \
-	-I$(CONTRIB_SIM)/include
-
-TELEPHONY_CFLAGS := -O2 -fPIC -DTARGET_OS_IPHONE=1 -DIPHONE $(TELEPHONY_INCLUDES) \
-	-mios-version-min=$(DEPLOYMENT_TARGET_VERSION) \
 	-Wno-shorten-64-to-32 -Wno-cast-align
 
 DIST_DIR	:= $(SOURCE_PATH)/dist
 XCFRAMEWORK	:= $(DIST_DIR)/telephony.xcframework
+MERGE_SCRIPT	:= $(SOURCE_PATH)/scripts/merge-static-lib.sh
 
 .PHONY: telephony xcframework
 
@@ -47,7 +43,8 @@ $(CONTRIB_SIM)/lib/libtelephony.a: $(TELEPHONY_OBJ_SIM) | $(CONTRIB_SIM)/lib
 $(CONTRIB_DEVICE)/lib/libtelephony_all.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libbaresip.a \
 		$(CONTRIB_DEVICE)/lib/libre.a
-	libtool -static -o $@ \
+	bash $(MERGE_SCRIPT) $@ $(SDK_ARM) ios $(DEPLOYMENT_TARGET_VERSION) \
+		$(BUILD_DEVICE)/baresip \
 		$(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libbaresip.a \
 		$(CONTRIB_DEVICE)/lib/libre.a
@@ -55,7 +52,8 @@ $(CONTRIB_DEVICE)/lib/libtelephony_all.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
 $(CONTRIB_SIM)/lib/libtelephony_all.a: $(CONTRIB_SIM)/lib/libtelephony.a \
 		$(CONTRIB_SIM)/lib/libbaresip.a \
 		$(CONTRIB_SIM)/lib/libre.a
-	libtool -static -o $@ \
+	bash $(MERGE_SCRIPT) $@ $(SDK_SIM) ios-simulator $(DEPLOYMENT_TARGET_VERSION) \
+		$(BUILD_SIM)/baresip \
 		$(CONTRIB_SIM)/lib/libtelephony.a \
 		$(CONTRIB_SIM)/lib/libbaresip.a \
 		$(CONTRIB_SIM)/lib/libre.a
