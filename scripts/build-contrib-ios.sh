@@ -88,11 +88,13 @@ build_baresip() {
 		-DCMAKE_OSX_SYSROOT="$sysroot" \
 		-DCMAKE_INSTALL_PREFIX="$prefix" \
 		-DCMAKE_PREFIX_PATH="$prefix" \
+		-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DSTATIC=ON \
 		-DMODULES="g711;audiounit;stun;turn;ice;uuid" \
 		-DRE_INCLUDE_DIR="$prefix/include/re" \
-		-DRE_LIBRARY="$prefix/lib/libre.a"
+		-DRE_LIBRARY="$prefix/lib/libre.a" \
+		-Dre_DIR="$prefix/lib/cmake/re"
 
 	cmake --build "$build" --target baresip -j"$NCPU"
 	cmake --install "$build" --component Development
