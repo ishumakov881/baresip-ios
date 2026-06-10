@@ -40,6 +40,18 @@ prepare_sources() {
 	if grep -q 'add_subdirectory(webrtc' "$baresip_cmake"; then
 		perl -pi -e 's/^add_subdirectory\(webrtc\)\n//' "$baresip_cmake"
 	fi
+	# Static iOS lib only — baresip_exe triggers MACOSX_BUNDLE install rules.
+	if grep -q '^add_executable(baresip_exe' "$baresip_cmake"; then
+		perl -pi -e 's/^add_executable\(baresip_exe /# ios-static: add_executable(baresip_exe /' "$baresip_cmake"
+		perl -pi -e 's/^set_target_properties\(baresip_exe /# ios-static: set_target_properties(baresip_exe /' "$baresip_cmake"
+		perl -pi -e 's/^target_link_libraries\(baresip_exe /# ios-static: target_link_libraries(baresip_exe /' "$baresip_cmake"
+	fi
+	if grep -q 'install(TARGETS baresip_exe baresip' "$baresip_cmake"; then
+		perl -pi -e 's/install\(TARGETS baresip_exe baresip/install(TARGETS baresip/' "$baresip_cmake"
+	fi
+	if grep -q 'add_subdirectory(packaging)' "$baresip_cmake"; then
+		perl -pi -e 's/^ add_subdirectory\(packaging\)/# ios-static: add_subdirectory(packaging)/' "$baresip_cmake"
+	fi
 }
 
 prepare_sources
