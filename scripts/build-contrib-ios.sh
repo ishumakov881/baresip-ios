@@ -27,8 +27,18 @@ prepare_sources() {
 	if grep -q '${OPENSSL_INCLUDE_DIR}' "$re_cmake"; then
 		perl -pi -e 's/\$\{OPENSSL_INCLUDE_DIR\} //' "$re_cmake"
 	fi
+	if grep -q 'add_subdirectory(test' "$re_cmake"; then
+		perl -pi -e 's/^add_subdirectory\(test.*\n//' "$re_cmake"
+	fi
+
 	if grep -q '${OPENSSL_INCLUDE_DIR}' "$baresip_cmake"; then
 		perl -pi -e 's/\s*\$\{OPENSSL_INCLUDE_DIR\}//' "$baresip_cmake"
+	fi
+	if grep -q 'add_subdirectory(test' "$baresip_cmake"; then
+		perl -pi -e 's/^add_subdirectory\(test\)\n//' "$baresip_cmake"
+	fi
+	if grep -q 'add_subdirectory(webrtc' "$baresip_cmake"; then
+		perl -pi -e 's/^add_subdirectory\(webrtc\)\n//' "$baresip_cmake"
 	fi
 }
 
