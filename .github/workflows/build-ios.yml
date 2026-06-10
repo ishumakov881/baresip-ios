@@ -10,6 +10,7 @@ on:
 jobs:
   build-contrib:
     runs-on: macos-14
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -17,15 +18,11 @@ jobs:
         run: |
           make download
           make contrib
-          ls -la contrib/ios-arm64/lib contrib/ios-simulator-arm64/lib
+          ls -la contrib/fat/lib/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: baresip-ios-contrib
-          path: |
-            contrib/ios-arm64/lib
-            contrib/ios-simulator-arm64/lib
-            contrib/ios-arm64/include
-            contrib/ios-simulator-arm64/include
+          path: contrib/fat/lib/
           retention-days: 30

@@ -1,21 +1,14 @@
 # Baresip for iOS
 
-Как [upstream baresip-ios](https://github.com/baresip/baresip-ios):
-
 ```bash
 make download
 make contrib
 ```
 
-Результат: `contrib/ios-arm64/lib/libre.a`, `libbaresip.a` и то же для `ios-simulator-arm64`.
+→ `contrib/fat/lib/libre.a`, `librem.a`, `libbaresip.a`
 
-Опционально (не CI): `make telephony` / `make xcframework` — обёртка `telephony/` для KMP.
+Версии: baresip/re `v3.24.0`, rem `v2.12.0` (как в upstream, с Makefile).
 
 ## CI
 
-- **GitHub Actions** — `.github/workflows/build-ios.yml`
-- **GitLab CI** — `.gitlab-ci.yml` (нужен macOS runner `saas-macos-medium-m1`)
-
-## KMP
-
-[`kmp/INTEGRATION.md`](kmp/INTEGRATION.md)
+GitHub Actions / GitLab CI — те же две команды.

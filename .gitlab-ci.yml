@@ -1,6 +1,3 @@
-# macOS runner: GitLab Premium / open source program, tag saas-macos-medium-m1
-# https://docs.gitlab.com/ci/runners/hosted_runners/macos/
-
 stages:
   - build
 
@@ -9,15 +6,13 @@ build-contrib:
   tags:
     - saas-macos-medium-m1
   image: macos-15-xcode-16
+  timeout: 1h
   script:
     - make download
     - make contrib
-    - ls -la contrib/ios-arm64/lib contrib/ios-simulator-arm64/lib
+    - ls -la contrib/fat/lib/
   artifacts:
     name: baresip-ios-contrib
     paths:
-      - contrib/ios-arm64/lib/
-      - contrib/ios-simulator-arm64/lib/
-      - contrib/ios-arm64/include/
-      - contrib/ios-simulator-arm64/include/
+      - contrib/fat/lib/
     expire_in: 30 days
