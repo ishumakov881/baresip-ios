@@ -1,4 +1,4 @@
-name: Build telephony xcframework
+name: Build iOS contrib
 
 on:
   push:
@@ -6,46 +6,26 @@ on:
   pull_request:
     branches: [main, master]
   workflow_dispatch:
-  release:
-    types: [published]
 
 jobs:
-  build-xcframework:
+  build-contrib:
     runs-on: macos-14
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build
+      - name: make download && make contrib
         run: |
           make download
-          make all
+          make contrib
+          ls -la contrib/ios-arm64/lib contrib/ios-simulator-arm64/lib
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: telephony-ios
+          name: baresip-ios-contrib
           path: |
-            dist/telephony.xcframework
-            dist/headers
             contrib/ios-arm64/lib
             contrib/ios-simulator-arm64/lib
+            contrib/ios-arm64/include
+            contrib/ios-simulator-arm64/include
           retention-days: 30
-
-      - name: Package zip for release
-        if: github.event_name == 'release'
-        run: |
-          cd dist
-          zip -r telephony-ios.zip telephony.xcframework headers
-          cd ../contrib
-          zip -r ../dist/telephony-ios-contrib.zip ios-arm64/lib ios-simulator-arm64/lib
-
-      - name: Upload release asset
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/telephony-ios.zip
-            dist/telephony-ios-contrib.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
