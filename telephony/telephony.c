@@ -8,6 +8,7 @@
 #define DEBUG_MODULE "telephony"
 #define DEBUG_LEVEL 7
 
+#include <re_dbg.h>
 #include <re.h>
 #include <baresip.h>
 
