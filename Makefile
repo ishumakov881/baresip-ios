@@ -2,25 +2,24 @@
 # baresip iOS — https://github.com/ishumakov881/baresip-ios
 #
 
-BARESIP_VER	:= v3.24.0
-RE_VER		:= v3.24.0
-REM_VER		:= v2.12.0
+BARESIP_VER	:= v4.8.0
+RE_VER		:= v4.8.1
 
 include mk/contrib.mk
 
 .PHONY: all download clean info telephony xcframework
 
-all: contrib
+all: contrib xcframework
 
 download:
-	rm -fr baresip re rem
+	rm -fr baresip re
 	git clone --depth 1 --branch $(BARESIP_VER) https://github.com/baresip/baresip.git
 	git clone --depth 1 --branch $(RE_VER) https://github.com/baresip/re.git
-	git clone --depth 1 --branch $(REM_VER) https://github.com/baresip/rem.git
 
 clean:
 	rm -rf build contrib dist
-	rm -rf baresip re rem
+	rm -f contrib/.contrib-built
+	rm -rf baresip re
 
 telephony xcframework:
 	$(MAKE) -f mk/telephony-standalone.mk $@

@@ -1,18 +1,24 @@
 stages:
   - build
 
-build-contrib:
+build-ios:
   stage: build
   tags:
     - saas-macos-medium-m1
   image: macos-15-xcode-16
-  timeout: 1h
+  timeout: 2h
   script:
+    - xcodebuild -version
+    - cmake --version
     - make download
     - make contrib
-    - ls -la contrib/fat/lib/
+    - make xcframework
+    - ls -la dist/telephony.xcframework contrib/ios-arm64/lib
   artifacts:
-    name: baresip-ios-contrib
+    name: telephony-ios
     paths:
-      - contrib/fat/lib/
+      - dist/telephony.xcframework
+      - dist/headers
+      - contrib/ios-arm64/lib/
+      - contrib/ios-simulator-arm64/lib/
     expire_in: 30 days

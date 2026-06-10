@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
 # Cross-compile libre + libbaresip (static) for iOS device and simulator.
-# Modern baresip/re use CMake; legacy Makefile targets (all/install) no longer exist.
 #
 set -euo pipefail
 
@@ -16,42 +15,24 @@ if [[ ! -d "$ROOT/re" || ! -d "$ROOT/baresip" ]]; then
 	exit 1
 fi
 
-# Upstream CMake still references OPENSSL_* when OpenSSL is absent (iOS uses Apple crypto).
-# Tests also require OpenSSL — drop them for cross-compile.
 prepare_sources() {
 	local re_cmake="$ROOT/re/CMakeLists.txt"
 	local baresip_cmake="$ROOT/baresip/CMakeLists.txt"
 
 	rm -rf "$ROOT/re/test" "$ROOT/baresip/test" "$ROOT/baresip/webrtc"
 
-	if grep -q '${OPENSSL_INCLUDE_DIR}' "$re_cmake"; then
-		perl -pi -e 's/\$\{OPENSSL_INCLUDE_DIR\} //' "$re_cmake"
-	fi
-	if grep -q 'add_subdirectory(test' "$re_cmake"; then
-		perl -pi -e 's/^add_subdirectory\(test.*\n//' "$re_cmake"
-	fi
+	perl -pi -e 's/\$\{OPENSSL_INCLUDE_DIR\}\s*//g' "$re_cmake" "$baresip_cmake"
+	perl -pi -e 's/\s*\$\{OPENSSL_INCLUDE_DIR\}//g' "$baresip_cmake"
 
-	if grep -q '${OPENSSL_INCLUDE_DIR}' "$baresip_cmake"; then
-		perl -pi -e 's/\s*\$\{OPENSSL_INCLUDE_DIR\}//' "$baresip_cmake"
-	fi
-	if grep -q 'add_subdirectory(test' "$baresip_cmake"; then
-		perl -pi -e 's/^add_subdirectory\(test\)\n//' "$baresip_cmake"
-	fi
-	if grep -q 'add_subdirectory(webrtc' "$baresip_cmake"; then
-		perl -pi -e 's/^add_subdirectory\(webrtc\)\n//' "$baresip_cmake"
-	fi
-	# Static iOS lib only — baresip_exe triggers MACOSX_BUNDLE install rules.
-	if grep -q '^add_executable(baresip_exe' "$baresip_cmake"; then
-		perl -pi -e 's/^add_executable\(baresip_exe /# ios-static: add_executable(baresip_exe /' "$baresip_cmake"
-		perl -pi -e 's/^set_target_properties\(baresip_exe /# ios-static: set_target_properties(baresip_exe /' "$baresip_cmake"
-		perl -pi -e 's/^target_link_libraries\(baresip_exe /# ios-static: target_link_libraries(baresip_exe /' "$baresip_cmake"
-	fi
-	if grep -q 'install(TARGETS baresip_exe baresip' "$baresip_cmake"; then
-		perl -pi -e 's/install\(TARGETS baresip_exe baresip/install(TARGETS baresip/' "$baresip_cmake"
-	fi
-	if grep -q 'add_subdirectory(packaging)' "$baresip_cmake"; then
-		perl -pi -e 's/^ add_subdirectory\(packaging\)/# ios-static: add_subdirectory(packaging)/' "$baresip_cmake"
-	fi
+	perl -pi -e 's/^add_subdirectory\(test.*\n//mg' "$re_cmake" "$baresip_cmake"
+	perl -pi -e 's/^add_subdirectory\(webrtc.*\n//mg' "$baresip_cmake"
+
+	perl -pi -e 's/^ add_subdirectory\(packaging\)/# ios-static: add_subdirectory(packaging)/mg' "$re_cmake" "$baresip_cmake"
+
+	perl -pi -e 's/^add_executable\(baresip_exe /# ios-static: add_executable(baresip_exe /mg' "$baresip_cmake"
+	perl -pi -e 's/^set_target_properties\(baresip_exe /# ios-static: set_target_properties(baresip_exe /mg' "$baresip_cmake"
+	perl -pi -e 's/^target_link_libraries\(baresip_exe /# ios-static: target_link_libraries(baresip_exe /mg' "$baresip_cmake"
+	perl -pi -e 's/install\(TARGETS baresip_exe baresip/install(TARGETS baresip/mg' "$baresip_cmake"
 }
 
 prepare_sources
@@ -77,7 +58,7 @@ build_re() {
 		-DUSE_REM=ON
 
 	cmake --build "$build" --target re -j"$NCPU"
-	cmake --install "$build"
+	cmake --install "$build" --component Development
 
 	if [[ ! -f "$prefix/lib/libre.a" ]]; then
 		mkdir -p "$prefix/lib"
@@ -103,9 +84,8 @@ build_baresip() {
 		-DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH \
 		-DCMAKE_BUILD_TYPE=MinSizeRel \
 		-DSTATIC=ON \
+		-DUSE_OPENSSL=OFF \
 		-DMODULES="g711;audiounit;stun;turn;ice;uuid" \
-		-DRE_INCLUDE_DIR="$prefix/include/re" \
-		-DRE_LIBRARY="$prefix/lib/libre.a" \
 		-Dre_DIR="$prefix/lib/cmake/re"
 
 	cmake --build "$build" --target baresip -j"$NCPU"

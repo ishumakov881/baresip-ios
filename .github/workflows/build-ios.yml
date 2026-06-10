@@ -1,4 +1,4 @@
-name: Build iOS contrib
+name: Build iOS telephony
 
 on:
   push:
@@ -8,21 +8,38 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-contrib:
+  build:
     runs-on: macos-14
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
-      - name: make download && make contrib
+      - name: Toolchain
         run: |
-          make download
-          make contrib
-          ls -la contrib/fat/lib/
+          xcodebuild -version
+          cmake --version
+
+      - name: make download
+        run: make download
+
+      - name: make contrib
+        run: make contrib
+
+      - name: make xcframework
+        run: make xcframework
+
+      - name: Verify artifacts
+        run: |
+          ls -la contrib/ios-arm64/lib contrib/ios-simulator-arm64/lib
+          ls -la dist/telephony.xcframework
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: baresip-ios-contrib
-          path: contrib/fat/lib/
+          name: telephony-ios
+          path: |
+            dist/telephony.xcframework
+            dist/headers
+            contrib/ios-arm64/lib
+            contrib/ios-simulator-arm64/lib
           retention-days: 30

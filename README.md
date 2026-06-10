@@ -1,14 +1,26 @@
-# Baresip for iOS
+# Baresip for iOS + telephony
+
+```bash
+make download
+make all
+```
+
+- `contrib/ios-arm64/lib/` + `ios-simulator-arm64/lib/` — `libre.a`, `libbaresip.a`
+- `dist/telephony.xcframework` — обёртка `telephony/` для KMP
+
+Версии: baresip `v4.8.0`, re `v4.8.1`.
+
+Только contrib (как upstream):
 
 ```bash
 make download
 make contrib
 ```
 
-→ `contrib/fat/lib/libre.a`, `librem.a`, `libbaresip.a`
-
-Версии: baresip/re `v3.24.0`, rem `v2.12.0` (как в upstream, с Makefile).
-
 ## CI
 
-GitHub Actions / GitLab CI — те же две команды.
+GitHub Actions / GitLab CI — `make download && make contrib && make xcframework`.
+
+## KMP
+
+[`kmp/INTEGRATION.md`](kmp/INTEGRATION.md)
