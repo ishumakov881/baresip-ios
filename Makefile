@@ -21,4 +21,5 @@ download:
 
 clean:
 	rm -rf $(BUILD_DIR) $(CONTRIB_DIR) $(DIST_DIR)
+	rm -f $(CONTRIB_DIR)/.contrib-built
 	rm -rf baresip re

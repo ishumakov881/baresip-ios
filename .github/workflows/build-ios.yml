@@ -22,8 +22,16 @@ jobs:
       - name: Clone baresip stack
         run: make download
 
+      - name: Build contrib (re + baresip)
+        run: make baresip
+
+      - name: List contrib libs
+        run: |
+          ls -la contrib/ios-arm64/lib || true
+          ls -la contrib/ios-simulator-arm64/lib || true
+
       - name: Build xcframework
-        run: make all
+        run: make xcframework
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

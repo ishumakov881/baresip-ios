@@ -38,6 +38,11 @@ build_re() {
 
 	cmake --build "$build" --target re -j"$NCPU"
 	cmake --install "$build"
+
+	if [[ ! -f "$prefix/lib/libre.a" ]]; then
+		mkdir -p "$prefix/lib"
+		cp "$build/libre.a" "$prefix/lib/libre.a"
+	fi
 }
 
 build_baresip() {
@@ -63,6 +68,11 @@ build_baresip() {
 
 	cmake --build "$build" --target baresip -j"$NCPU"
 	cmake --install "$build" --component Development
+
+	if [[ ! -f "$prefix/lib/libbaresip.a" ]]; then
+		mkdir -p "$prefix/lib"
+		cp "$build/libbaresip.a" "$prefix/lib/libbaresip.a"
+	fi
 }
 
 build_slice() {

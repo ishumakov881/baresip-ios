@@ -22,12 +22,27 @@ BUILD_DIR	:= $(SOURCE_PATH)/build
 BUILD_DEVICE	:= $(BUILD_DIR)/ios-arm64
 BUILD_SIM	:= $(BUILD_DIR)/ios-simulator-arm64
 
+CONTRIB_STAMP	:= $(CONTRIB_DIR)/.contrib-built
+
 .PHONY: contrib baresip libre librem info
 
 contrib: baresip
 
-baresip libre librem:
+$(CONTRIB_STAMP):
 	@DEPLOYMENT_TARGET_VERSION=$(DEPLOYMENT_TARGET_VERSION) bash scripts/build-contrib-ios.sh
+	@test -f $(CONTRIB_DEVICE)/lib/libre.a
+	@test -f $(CONTRIB_DEVICE)/lib/libbaresip.a
+	@test -f $(CONTRIB_SIM)/lib/libre.a
+	@test -f $(CONTRIB_SIM)/lib/libbaresip.a
+	@touch $@
+
+baresip libre librem: $(CONTRIB_STAMP)
+
+$(CONTRIB_DEVICE)/lib/libre.a \
+$(CONTRIB_DEVICE)/lib/libbaresip.a \
+$(CONTRIB_SIM)/lib/libre.a \
+$(CONTRIB_SIM)/lib/libbaresip.a: $(CONTRIB_STAMP)
+	@test -f $@
 
 info:
 	@echo "SDK_ARM:    $(SDK_ARM)"
