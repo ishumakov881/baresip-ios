@@ -1,5 +1,5 @@
 /**
- * LDS Online iOS telephony — same call flow as Android telephony.c:
+ * iOS telephony — same call flow as Android telephony.c:
  * ua_alloc → ua_register → ua_connect(peer).
  */
 #include <stdlib.h>

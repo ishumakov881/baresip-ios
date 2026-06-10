@@ -1,5 +1,5 @@
 #
-# LDS Online — baresip iOS + telephony
+# baresip iOS + telephony
 # Fork: https://github.com/ishumakov881/baresip-ios
 #
 

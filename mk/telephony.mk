@@ -1,5 +1,5 @@
 #
-# Build libtelephony.a and merged liblds-telephony.a per iOS slice.
+# Build libtelephony.a (objects) and libtelephony_all.a (merged with baresip) per slice.
 #
 
 TELEPHONY_DIR	:= $(SOURCE_PATH)/telephony
@@ -20,11 +20,11 @@ TELEPHONY_CFLAGS := -O2 -fPIC -DTARGET_OS_IPHONE=1 -DIPHONE $(TELEPHONY_INCLUDES
 	-Wno-shorten-64-to-32 -Wno-cast-align
 
 DIST_DIR	:= $(SOURCE_PATH)/dist
-XCFRAMEWORK	:= $(DIST_DIR)/LdsTelephonyKit.xcframework
+XCFRAMEWORK	:= $(DIST_DIR)/telephony.xcframework
 
 .PHONY: telephony xcframework
 
-telephony: baresip $(CONTRIB_DEVICE)/lib/liblds-telephony.a $(CONTRIB_SIM)/lib/liblds-telephony.a
+telephony: baresip $(CONTRIB_DEVICE)/lib/libtelephony_all.a $(CONTRIB_SIM)/lib/libtelephony_all.a
 
 $(BUILD_DEVICE)/telephony $(BUILD_SIM)/telephony:
 	@mkdir -p $@
@@ -45,7 +45,7 @@ $(CONTRIB_DEVICE)/lib/libtelephony.a: $(TELEPHONY_OBJ_DEVICE) | $(CONTRIB_DEVICE
 $(CONTRIB_SIM)/lib/libtelephony.a: $(TELEPHONY_OBJ_SIM) | $(CONTRIB_SIM)/lib
 	ar rcs $@ $(TELEPHONY_OBJ_SIM)
 
-$(CONTRIB_DEVICE)/lib/liblds-telephony.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
+$(CONTRIB_DEVICE)/lib/libtelephony_all.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libbaresip.a \
 		$(CONTRIB_DEVICE)/lib/libre.a \
 		$(CONTRIB_DEVICE)/lib/librem.a
@@ -55,7 +55,7 @@ $(CONTRIB_DEVICE)/lib/liblds-telephony.a: $(CONTRIB_DEVICE)/lib/libtelephony.a \
 		$(CONTRIB_DEVICE)/lib/libre.a \
 		$(CONTRIB_DEVICE)/lib/librem.a
 
-$(CONTRIB_SIM)/lib/liblds-telephony.a: $(CONTRIB_SIM)/lib/libtelephony.a \
+$(CONTRIB_SIM)/lib/libtelephony_all.a: $(CONTRIB_SIM)/lib/libtelephony.a \
 		$(CONTRIB_SIM)/lib/libbaresip.a \
 		$(CONTRIB_SIM)/lib/libre.a \
 		$(CONTRIB_SIM)/lib/librem.a
@@ -70,7 +70,7 @@ xcframework: telephony
 	@mkdir -p $(DIST_DIR)/headers
 	@cp $(TELEPHONY_DIR)/telephony.h $(TELEPHONY_DIR)/telephony_callback.h $(DIST_DIR)/headers/
 	xcodebuild -create-xcframework \
-		-library $(CONTRIB_DEVICE)/lib/liblds-telephony.a -headers $(DIST_DIR)/headers \
-		-library $(CONTRIB_SIM)/lib/liblds-telephony.a -headers $(DIST_DIR)/headers \
+		-library $(CONTRIB_DEVICE)/lib/libtelephony_all.a -headers $(DIST_DIR)/headers \
+		-library $(CONTRIB_SIM)/lib/libtelephony_all.a -headers $(DIST_DIR)/headers \
 		-output $(XCFRAMEWORK)
 	@echo "Built $(XCFRAMEWORK)"

@@ -1,11 +1,11 @@
-# Подключение LdsTelephonyKit в walhalla-kmp / ldsonline
+# Подключение telephony.xcframework в walhalla-kmp / ldsonline
 
 ## 1. Скачать xcframework
 
-Из GitHub Actions artifact или Release репозитория [ishumakov881/baresip-ios](https://github.com/ishumakov881/baresip-ios).
+Из GitHub Actions artifact или Release: [ishumakov881/baresip-ios](https://github.com/ishumakov881/baresip-ios).
 
 ```
-kmp/sip/prebuilt/ios/LdsTelephonyKit.xcframework
+kmp/sip/prebuilt/ios/telephony.xcframework
 ```
 
 ## 2. build.gradle.kts (`:kmp:sip`)
@@ -15,7 +15,7 @@ kotlin {
     listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { target ->
         target.compilations.getByName("main") {
             cinterops {
-                val ldsTelephony by creating {
+                val telephony by creating {
                     defFile(project.file("src/nativeInterop/cinterop/telephony.def"))
                     includeDirs(project.file("prebuilt/ios/Headers"))
                 }
@@ -25,7 +25,7 @@ kotlin {
             baseName = "sipKit"
             linkerOpts(
                 "-F${project.file("prebuilt/ios")}",
-                "-framework", "LdsTelephonyKit",
+                "-framework", "telephony",
                 "-framework", "AudioToolbox",
                 "-framework", "CoreAudio",
                 "-framework", "AVFoundation",
@@ -41,7 +41,7 @@ kotlin {
 
 ## 3. IosSipEngine
 
-Скопировать `kmp/IosSipEngine.kt` в `src/iosMain/kotlin/net/lds/sip/`, доработать `allocAudioCall` (malloc + strdup через cinterop).
+Скопировать `kmp/IosSipEngine.kt` в `src/iosMain/kotlin/net/lds/sip/`.
 
 ## 4. Koin
 

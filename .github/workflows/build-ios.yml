@@ -1,4 +1,4 @@
-name: Build LdsTelephonyKit
+name: Build telephony xcframework
 
 on:
   push:
@@ -25,9 +25,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LdsTelephonyKit-xcframework
+          name: telephony-xcframework
           path: |
-            dist/LdsTelephonyKit.xcframework
+            dist/telephony.xcframework
             dist/headers
           retention-days: 30
 
@@ -35,12 +35,12 @@ jobs:
         if: github.event_name == 'release'
         run: |
           cd dist
-          zip -r LdsTelephonyKit.xcframework.zip LdsTelephonyKit.xcframework headers
+          zip -r telephony.xcframework.zip telephony.xcframework headers
 
       - name: Upload release asset
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/LdsTelephonyKit.xcframework.zip
+          files: dist/telephony.xcframework.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

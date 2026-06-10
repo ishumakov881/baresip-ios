@@ -17,7 +17,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import platform.Foundation.NSTemporaryDirectory
 
 /**
- * iOS SIP engine — cinterop на [LdsTelephonyKit.xcframework].
+ * iOS SIP engine — cinterop на telephony.xcframework.
  * Скопировать в :kmp:sip iosMain после подключения prebuilt.
  */
 class IosSipEngine : SipEngine {
@@ -37,7 +37,7 @@ class IosSipEngine : SipEngine {
 
     override suspend fun start() {
         if (loopContext != null) return
-        val ctx = newSingleThreadContext("lds-telephony")
+        val ctx = newSingleThreadContext("sip-telephony")
         loopContext = ctx
         scope.launch(ctx) {
             val ok = telephony_init(NSTemporaryDirectory()) == 0
