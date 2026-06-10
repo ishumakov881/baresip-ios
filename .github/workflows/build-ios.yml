@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: CMake version
+        run: cmake --version
+
       - name: Clone baresip stack
         run: make download
 
