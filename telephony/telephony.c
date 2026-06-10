@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <re.h>
+#include <re_dbg.h>
 #include <baresip.h>
 
 #include "telephony.h"
@@ -42,6 +43,7 @@ static const char *g_cfgBuf =
 	"module_tmp\t\tuuid\n";
 
 static struct mqueue *g_messageQueue;
+static struct ua *g_ua;
 static struct call *g_call;
 
 static void cmd_hangup(void);
@@ -73,30 +75,52 @@ static void platform_log_msg(uint32_t level, const char *msg)
 
 static struct log g_platformLog;
 
-static void event_listener(struct ua *ua, enum ua_event ev,
-			   struct call *call, const char *prm, void *arg)
+/* net.lds.sip.SipEvent still uses legacy ua_event numbering (baresip 1.x). */
+static int legacy_event_code(enum bevent_ev ev)
 {
+	switch (ev) {
+	case BEVENT_CALL_RINGING:
+		return 10;
+	case BEVENT_CALL_ESTABLISHED:
+		return 12;
+	case BEVENT_CALL_CLOSED:
+		return 13;
+	default:
+		if (ev <= BEVENT_REGISTER_FAIL)
+			return (int)ev;
+		return -1;
+	}
+}
+
+static void event_listener(enum bevent_ev ev, struct bevent *event, void *arg)
+{
+	struct call *call;
 	const char *callId = NULL;
 	uint16_t scode = 0;
+	int code;
 
-	(void)ua;
-	(void)call;
-	(void)prm;
 	(void)arg;
 
-	if (UA_EVENT_CALL_RINGING == ev)
-		callId = call_id(g_call);
+	call = bevent_get_call(event);
+	if (!call)
+		call = g_call;
 
-	if (UA_EVENT_CALL_CLOSED == ev) {
-		scode = call_scode(g_call);
-		LOGI("UA_EVENT_CALL_CLOSED (%u)", scode);
+	if (ev == BEVENT_CALL_RINGING && call)
+		callId = call_id(call);
+
+	if (ev == BEVENT_CALL_CLOSED) {
+		if (call)
+			scode = call_scode(call);
+		LOGI("BEVENT_CALL_CLOSED (%u)", scode);
 		g_call = NULL;
 	}
 	else {
-		LOGI("UA_EVENT_%s", uag_event_str(ev));
+		LOGI("BEVENT_%s", bevent_str(ev));
 	}
 
-	notifyEvent((int)ev, (int)scode, callId);
+	code = legacy_event_code(ev);
+	if (code >= 0)
+		notifyEvent(code, (int)scode, callId);
 }
 
 static void mqueue_handler(int id, void *data, void *arg)
@@ -120,7 +144,7 @@ static void mqueue_handler(int id, void *data, void *arg)
 
 static void cmd_hangup(void)
 {
-	struct ua *ua = uag_current();
+	struct ua *ua = g_ua;
 
 	if (!ua)
 		return;
@@ -148,6 +172,8 @@ static int cmd_audioCall(AudioCall_t *ac)
 		goto out;
 	}
 
+	g_ua = ua;
+
 	err = ua_register(ua);
 	if (err) {
 		LOGI("ERROR: ua_register %d", err);
@@ -159,8 +185,11 @@ static int cmd_audioCall(AudioCall_t *ac)
 		LOGI("ERROR: ua_connect %d", err);
 
 out:
-	if (err && ua)
+	if (err && ua) {
+		if (g_ua == ua)
+			g_ua = NULL;
 		mem_deref(ua);
+	}
 
 	free(ac->peer);
 	free(ac->passw);
@@ -182,7 +211,8 @@ static void tel_done(void)
 		g_messageQueue = NULL;
 	}
 
-	uag_event_unregister(event_listener);
+	bevent_unregister(event_listener);
+	g_ua = NULL;
 	ua_stop_all(true);
 	ua_close();
 
@@ -253,9 +283,9 @@ int telephony_init(const char *path)
 		return err;
 	}
 
-	err = uag_event_register(event_listener, NULL);
+	err = bevent_register(event_listener, NULL);
 	if (err) {
-		LOGI("ERROR: uag_event_register %d", err);
+		LOGI("ERROR: bevent_register %d", err);
 		tel_done();
 		return err;
 	}
