@@ -16,6 +16,24 @@ if [[ ! -d "$ROOT/re" || ! -d "$ROOT/baresip" ]]; then
 	exit 1
 fi
 
+# Upstream CMake still references OPENSSL_* when OpenSSL is absent (iOS uses Apple crypto).
+# Tests also require OpenSSL — drop them for cross-compile.
+prepare_sources() {
+	local re_cmake="$ROOT/re/CMakeLists.txt"
+	local baresip_cmake="$ROOT/baresip/CMakeLists.txt"
+
+	rm -rf "$ROOT/re/test" "$ROOT/baresip/test" "$ROOT/baresip/webrtc"
+
+	if grep -q '${OPENSSL_INCLUDE_DIR}' "$re_cmake"; then
+		perl -pi -e 's/\$\{OPENSSL_INCLUDE_DIR\} //' "$re_cmake"
+	fi
+	if grep -q '${OPENSSL_INCLUDE_DIR}' "$baresip_cmake"; then
+		perl -pi -e 's/\s*\$\{OPENSSL_INCLUDE_DIR\}//' "$baresip_cmake"
+	fi
+}
+
+prepare_sources
+
 build_re() {
 	local name="$1"
 	local sysroot="$2"
